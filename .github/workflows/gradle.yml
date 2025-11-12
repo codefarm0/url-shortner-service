@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,18 +23,24 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build and Test with Gradle Wrapper
-        run: ./gradlew build
+        run: ./gradlew clean build --scan --no-daemon
 
       - name: Upload build artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
-          path: |
-            build/libs/*.jar
+          path: build/libs/*.jar
+
+      - name: Save Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/test-results/test/
 
   dependency-submission:
     runs-on: ubuntu-latest
@@ -50,4 +55,4 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/dependency-submission@v4
