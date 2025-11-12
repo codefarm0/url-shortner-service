@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #0b1020; color: #e8ecf1; }
+        .container { max-width: 760px; margin: 48px auto; padding: 0 16px; }
+        .card { background: #121a35; border: 1px solid #1f2a4a; border-radius: 12px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+        h1 { margin: 0 0 16px; font-size: 24px; }
+        p { margin: 0 0 24px; color: #b8c2cc; }
+        .row { display: grid; gap: 12px; grid-template-columns: 1fr; }
+        label { font-size: 13px; color: #9fb3c8; }
+        input[type="text"] { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #2a3a66; background: #0e1630; color: #e8ecf1; }
+        input[type="text"]::placeholder { color: #7588a6; }
+        .actions { display: flex; gap: 12px; margin-top: 12px; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .result { margin-top: 20px; padding: 14px; border-radius: 8px; background: #0e1630; border: 1px solid #26355f; }
+        .muted { color: #9fb3c8; font-size: 14px; }
+        a.short { color: #9ee7ff; font-weight: 600; text-decoration: none; }
+        .error { color: #ff9aa2; margin-top: 12px; }
+    </style>
+    <meta name="robots" content="noindex">
+    <meta http-equiv="Cache-Control" content="private, max-age=90">
+    <meta http-equiv="X-Robots-Tag" content="noindex">
+    <script>
+        function copyToClipboard() {
+            const el = document.getElementById('shortUrl');
+            if (el) {
+                navigator.clipboard.writeText(el.textContent).then(() => {
+                    const btn = document.getElementById('copyBtn');
+                    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 1200); }
+                });
+            }
+        }
+    </script>
+    <style id="print-style" media="print">
+        .actions { display: none; }
+    </style>
+    <!--
+      Cache Policy Documentation
+      We intentionally set headers/meta to guide caching for short URL pages.
+      Actual redirect responses set Cache-Control: private, max-age=90 and X-Robots-Tag: noindex.
+    -->
+    <meta http-equiv="Cache-Report" content="If issues, clear browser cache.">
+    <!-- End Cache Policy Documentation -->
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>URL Shortener</h1>
+        <p class="muted">Paste a long URL. Optionally provide a custom alias.</p>
+        <form action="/shorten" method="post" class="row">
+            <div>
+                <label for="longUrl">Long URL</label>
+                <input id="longUrl" name="longUrl" type="text" placeholder="https://example.com/very/long/path?param=value" required>
+            </div>
+            <div>
+                <label for="customAlias">Custom alias (optional)</label>
+                <input id="customAlias" name="customAlias" type="text" placeholder="my-awesome-link">
+            </div>
+            <div>
+                <label for="userUuid">User UUID (optional)</label>
+                <input id="userUuid" name="userUuid" type="text" placeholder="user-123e4567-e89b-12d3-a456-426614174000">
+            </div>
+            <div class="actions">
+                <button type="submit">Shorten</button>
+                <button type="reset" style="background:#334155">Clear</button>
+            </div>
+        </form>
+
+        <div th:if="${shortUrl}" class="result">
+            <div class="muted">Your short URL</div>
+            <div>
+                <a id="shortUrl" class="short" th:href="${shortUrl}" th:text="${shortUrl}" target="_blank" rel="noopener"></a>
+            </div>
+            <div class="actions" style="margin-top:8px;">
+                <button id="copyBtn" type="button" onclick="copyToClipboard()">Copy</button>
+            </div>
+            <div class="muted" style="margin-top:8px;">Created at <span th:text="${createdAt}"></span></div>
+        </div>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+    </div>
+</div>
+</body>
+</html>
+
+
